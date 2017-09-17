@@ -1,0 +1,49 @@
+version: '2'
+services:
+    db:
+        container_name: mariadb_container
+        image: yobasystems/alpine-mariadb
+        environment:
+            MYSQL_ROOT_PASSWORD: toor
+            MYSQL_DATABASE: mangapie
+            MYSQL_USER: mangapie
+            MYSQL_PASSWORD: secret
+        ports:
+            - "33306:3306"
+        volumes:
+            - ./mysql:/var/lib/mysql
+        restart: always
+
+    web:
+        container_name: nginx_container
+        image: nginx:alpine
+        ports:
+            - "443:443"
+        volumes:
+            - ./www/mangapie:/var/www/mangapie
+            - ./nginx/log:/var/log/nginx
+            - ./nginx/certs:/etc/nginx/certs
+            - ./nginx/conf.d/mangapie.conf:/etc/nginx/conf.d/mangapie.conf
+        restart: always
+        depends_on:
+            - php
+    php:
+        container_name: php_container
+        volumes:
+            # php config
+            - ./php-fpm/php-fpm.conf:/usr/local/etc/php-fpm.conf
+            - ./php-fpm/php-fpm.d/www.conf:/etc/php-fpm.d/www.conf
+            # mangapie
+            - ./www/mangapie:/var/www/mangapie
+            - ./mangapie-init.sh:/var/www/mangapie/mangapie-init.sh
+            - ./mangapie-update.sh:/var/www/mangapie/mangapie-update.sh
+            # Add your manga dirs here
+            - /mnt/hdd2/Manga/Manga:/manga
+        depends_on:
+            - db
+        build:
+            context: .
+            dockerfile: php.Dockerfile
+        ports:
+            - "9000:9000"
+        restart: always
