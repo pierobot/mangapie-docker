@@ -1,5 +1,6 @@
 manga/*
 mysql/*
 www/*
-nginx/certs/*
+nginx/certs/*.crt
+nginx/certs/*.key
 nginx/log/*
