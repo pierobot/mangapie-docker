@@ -10,7 +10,7 @@ Clone the repository, mangapie, and create the .env file we need.
 ```
 git clone https://github.com/pierobot/mangapie-docker && cd mangapie-docker
 git clone https://github.com/pierobot/mangapie www/mangapie
-cp www/mangapie/.env.example /www/mangapie/.env
+cp www/mangapie/.env.example www/mangapie/.env
 ```
 
 Edit the appropriate APP and DB fields in the .env file.  
