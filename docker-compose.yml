@@ -1,7 +1,7 @@
 version: '2'
 services:
     db:
-        container_name: mariadb_container
+        container_name: mangapie.mariadb
         image: yobasystems/alpine-mariadb
         environment:
             MYSQL_ROOT_PASSWORD: toor
@@ -15,7 +15,7 @@ services:
         restart: always
 
     web:
-        container_name: nginx_container
+        container_name: mangapie.nginx
         image: nginx:alpine
         ports:
             - "443:443"
@@ -28,7 +28,7 @@ services:
         depends_on:
             - php
     php:
-        container_name: php_container
+        container_name: mangapie.php7-fpm
         volumes:
             # php config
             - ./php-fpm/php-fpm.conf:/usr/local/etc/php-fpm.conf
@@ -38,12 +38,12 @@ services:
             - ./mangapie-init.sh:/var/www/mangapie/mangapie-init.sh
             - ./mangapie-update.sh:/var/www/mangapie/mangapie-update.sh
             # Add your manga dirs here
-            - /mnt/hdd2/Manga/Manga:/manga
+            - ./manga/manga:/manga
         depends_on:
             - db
         build:
             context: .
-            dockerfile: php.Dockerfile
+            dockerfile: mangapie.php7-fpm.Dockerfile
         ports:
             - "9000:9000"
         restart: always

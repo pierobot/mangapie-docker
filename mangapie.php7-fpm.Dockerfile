@@ -9,6 +9,7 @@ RUN apk add --update \
         autoconf \
         bash \
         g++ \
+        git \
         make \
         mysql-client \
         mariadb-client \
@@ -63,3 +64,5 @@ RUN apk del --purge autoconf \
                     && rm -rf /var/cache/apk/*
 
 WORKDIR /var/www/mangapie
+
+VOLUME "/manga"
