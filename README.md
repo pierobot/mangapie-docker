@@ -44,14 +44,8 @@ docker-compose up
 
 ### Edit .env
 
-Edit the appropriate **APP_** and **DB_** fields in the .env file.  
-Be sure to enter the **correct** IP/hostname and that the ports are not already in use.
-
-You can get the IP of the database container using
-
-```bash
-docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' mangapie.mariadb
-```
+Edit the appropriate `APP_` and `DB_` fields in the .env file.  
+**Note:** You can set `DB_HOSTNAME` to `db`.
 
 ### Initialize
 
