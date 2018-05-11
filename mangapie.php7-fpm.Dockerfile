@@ -43,8 +43,7 @@ RUN apk add --update \
         # php7-zip
 
 # The packages commented above are not being detected by PHP so let's have fun building.
-# php7-intl will fail to compile unless g++ is given the c++11 flag because of char16_t and other types.
-ENV CXXFLAGS="-std=c++11"
+
 # libjpeg-turbo-dev doesn't get detected by php7-gd's configure script so we have to manually specify the include dir
 RUN docker-php-ext-configure gd --with-jpeg-dir=/usr/include && docker-php-ext-install gd
 RUN docker-php-ext-install intl
