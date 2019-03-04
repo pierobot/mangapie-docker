@@ -1,49 +1,77 @@
-version: '2'
+version: '3'
 services:
-    db:
-        container_name: mangapie.mariadb
-        image: yobasystems/alpine-mariadb
-        environment:
-            MYSQL_ROOT_PASSWORD: toor
-            MYSQL_DATABASE: mangapie
-            MYSQL_USER: mangapie
-            MYSQL_PASSWORD: secret
-        ports:
-            - "33306:3306"
-        volumes:
-            - ./mysql:/var/lib/mysql
-        restart: always
+  db:
+    container_name: mangapie.mariadb
+    image: mariadb
+    environment:
+      MYSQL_ROOT_PASSWORD: toor
+      MYSQL_DATABASE: mangapie
+      MYSQL_USER: mangapie
+      MYSQL_PASSWORD: secret
+    ports:
+      - "3306:3306"
+    volumes:
+      - ./mysql:/var/lib/mysql
+    restart: always
 
-    web:
-        container_name: mangapie.nginx
-        image: nginx:alpine
-        ports:
-            - "443:443"
-        volumes:
-            - ./www/mangapie:/var/www/mangapie
-            - ./nginx/log:/var/log/nginx
-            - ./nginx/certs:/etc/nginx/certs
-            - ./nginx/conf.d/mangapie.conf:/etc/nginx/conf.d/mangapie.conf
-        restart: always
-        depends_on:
-            - php
-    php:
-        container_name: mangapie.php7-fpm
-        volumes:
-            # php config
-            - ./php-fpm/php-fpm.conf:/usr/local/etc/php-fpm.conf
-            - ./php-fpm/php-fpm.d/www.conf:/etc/php-fpm.d/www.conf
-            # mangapie
-            - ./www/mangapie:/var/www/mangapie
-            - ./mangapie-init.sh:/var/www/mangapie/mangapie-init.sh
-            - ./mangapie-update.sh:/var/www/mangapie/mangapie-update.sh
-            # Add your manga dirs here
-            - ./manga/manga:/manga
-        depends_on:
-            - db
-        build:
-            context: .
-            dockerfile: mangapie.php7-fpm.Dockerfile
-        ports:
-            - "9000:9000"
-        restart: always
+  redis:
+    container_name: mangapie.redis
+    image: redis:alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - ./redis:/data
+    restart: always
+
+  web:
+    container_name: mangapie.nginx
+    image: mangapie.nginx:latest
+    ports:
+      - "443:443"
+    volumes:
+      - ./php-fpm/run/php:/run/php
+      - ./www/mangapie:/var/www/mangapie
+      - ./nginx/log:/var/log/nginx
+      - ./nginx/certs:/etc/nginx/certs
+      - ./nginx/conf.d/mangapie.conf:/etc/nginx/conf.d/mangapie.conf
+    restart: always
+    links:
+      - php
+    build:
+      context: .
+      dockerfile: mangapie.nginx.Dockerfile
+
+  php:
+    container_name: mangapie.php7-fpm
+    image: mangapie.php7-fpm:latest
+    environment:
+      APP_DEBUG: "false"
+      APP_URL: "https://192.168.1.142/"
+      APP_IMAGE_EXTRACT: "false"
+      DB_HOST: db
+      DB_PORT: 3306
+      DB_DATABASE: mangapie
+      DB_USERNAME: mangapie
+      DB_PASSWORD: secret
+      CACHE_DRIVER: redis
+      QUEUE_DRIVER: redis
+      SESSION_DRIVER: redis
+      REDIS_HOST: redis
+      REDIS_PASSWORD: null
+      REDIS_PORT: 6379
+    volumes:
+      # php config
+      - ./php-fpm/php-fpm.d/www.conf:/usr/local/etc/php-fpm.d/zz-docker.conf
+      - ./php-fpm/run/php:/run/php
+      # mangapie
+      - ./www/mangapie:/var/www/mangapie
+      - ./mangapie.sh:/usr/local/bin/mangapie
+      # Add your manga dirs here
+      - ./manga:/manga
+    links:
+      - db
+      - redis
+    build:
+      context: .
+      dockerfile: mangapie.php7-fpm.Dockerfile
+    restart: always

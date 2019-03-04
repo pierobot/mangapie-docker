@@ -48,10 +48,23 @@ RUN apk add --update \
 RUN docker-php-ext-configure gd --with-jpeg-dir=/usr/include && docker-php-ext-install gd
 RUN docker-php-ext-install intl
 RUN docker-php-ext-install pdo_mysql
+RUN docker-php-ext-install sockets
 RUN docker-php-ext-install zip
 
+# Build & install the inotify module
+RUN pecl install inotify && docker-php-ext-enable inotify
+
 # Build & install the rar module
-RUN pecl install rar && docker-php-ext-enable rar
+RUN git clone https://github.com/cataphract/php-rar && \
+    cd php-rar && \
+    phpize && \
+    ./configure && \
+    make && \
+    make install && \
+    docker-php-ext-enable rar
+
+# Build & install the redis module
+RUN pecl install redis && docker-php-ext-enable redis
 
 # Install composer
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/bin --filename=composer
@@ -62,6 +75,6 @@ RUN apk del --purge autoconf \
                     make \
                     && rm -rf /var/cache/apk/*
 
-WORKDIR /var/www/mangapie
-
-VOLUME "/manga"
+RUN deluser www-data && \
+    addgroup -g 339 -S www-data && \
+    adduser -u 339 -D -S -G www-data www-data
