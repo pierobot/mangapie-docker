@@ -39,6 +39,7 @@ docker-compose up
 Install mangapie and restart the containers.
 ```bash
 docker exec -it mangapie.php7-fpm mangapie install
+docker-compose down
 docker-compose up
 ```
 
