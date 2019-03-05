@@ -1,4 +1,4 @@
 *
-!certs/.gitignore
-!conf.d/.gitignore
+!certs/
+!conf.d/
 !.gitignore

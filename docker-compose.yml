@@ -67,7 +67,7 @@ services:
       - ./www/mangapie:/var/www/mangapie
       - ./mangapie.sh:/usr/local/bin/mangapie
       # Add your manga dirs here
-      - ./manga:/manga
+      - ./manga:/manga:ro
     links:
       - db
       - redis
@@ -75,3 +75,35 @@ services:
       context: .
       dockerfile: mangapie.php7-fpm.Dockerfile
     restart: always
+
+  supervisor:
+    container_name: mangapie.supervisor
+    image: mangapie.supervisor:latest
+    environment:
+      APP_DEBUG: "false"
+      APP_URL: "https://192.168.1.142/"
+      APP_IMAGE_EXTRACT: "false"
+      DB_HOST: db
+      DB_PORT: 3306
+      DB_DATABASE: mangapie
+      DB_USERNAME: mangapie
+      DB_PASSWORD: secret
+      CACHE_DRIVER: redis
+      QUEUE_DRIVER: redis
+      SESSION_DRIVER: redis
+      REDIS_HOST: redis
+      REDIS_PASSWORD: null
+      REDIS_PORT: 6379
+    volumes:
+      - ./php-fpm/run/php:/run/php
+      - ./www/mangapie:/var/www/mangapie
+      - ./manga:/manga:ro
+      - ./supervisor/conf.d/mangapie.conf:/etc/supervisor/conf.d/mangapie.conf
+      - ./supervisor/log:/var/log/supervisor
+    links:
+      - db
+      - redis
+      - php
+    build:
+      context: .
+      dockerfile: mangapie.supervisor.Dockerfile

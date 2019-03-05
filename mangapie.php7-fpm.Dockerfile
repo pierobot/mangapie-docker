@@ -76,5 +76,5 @@ RUN apk del --purge autoconf \
                     && rm -rf /var/cache/apk/*
 
 RUN deluser www-data && \
-    addgroup -g 339 -S www-data && \
-    adduser -u 339 -D -S -G www-data www-data
+    addgroup -g 3390 -S www-data && \
+    adduser -u 3390 -D -S -G www-data www-data

@@ -25,7 +25,7 @@ install() {
 }
 
 update() {
-    cd mangapie
+    cd /var/www/mangapie
 
     php artisan down
 
