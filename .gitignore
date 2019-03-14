@@ -1,5 +1,1 @@
-mysql/*
-www/*
-nginx/certs/*.crt
-nginx/certs/*.key
-nginx/log/*
+.idea/

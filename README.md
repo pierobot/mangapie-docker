@@ -13,7 +13,7 @@ pip3 install docker-compose
 
 ### Manga
 
-Add directories to the ``manga/manga`` directory.  
+Add directories to the ``manga`` directory.  
 **Note**: Unfortunately, docker does not allow you to use symbolic links inside volumes.
 
 ### Certificates
@@ -25,40 +25,32 @@ Create the required TLS certificates.
 openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout nginx/certs/mangapie.key -out nginx/certs/mangapie.crt
 ```
 
-### mangapie
-Clone the repository, mangapie, and create the .env file we need.
-
-```bash
-git clone https://github.com/pierobot/mangapie-docker && cd mangapie-docker
-git clone https://github.com/pierobot/mangapie www/mangapie
-cp www/mangapie/.env.example www/mangapie/.env
-```
-
 ### Build Containers
 
-Build and start the containers (This will take a while the first time)
+Build and start the containers. This will take a while the first time.  
 
 ```bash
+docker-compose build
 docker-compose up
 ```
 
-### Edit .env
+**Note**: The supervisor container will have its workers exit the very first run. It is safe to ignore.  
 
-Edit the appropriate `APP_` and `DB_` fields in the .env file.  
-**Note:** You can set `DB_HOSTNAME` to `db`.
-
-### Initialize
-
-Finally, run the init script which will take care of creating an app key and seeding the database.
-
+Install mangapie and restart the containers.
 ```bash
-docker exec mangapie.php7-fpm sh -c "./mangapie-init.sh"
+docker exec -it mangapie.php7-fpm mangapie install
+docker-compose down
+docker-compose up
 ```
 
-### Updating
-
-If you ever wish to update mangapie, simply run the update script.
-
+If you ever need to update the actual mangapie code, use the following:  
 ```bash
-docker exec mangapie.php7-fpm sh -c "./mangapie-update.sh"
+docker exec -it mangapie.php7-fpm mangapie update
 ```
+
+Finally, load up the site in your browser, sign in using "dev", for the username, and "dev" for the password.
+
+### Things to  consider
+* These containers use 3390 for the user and group IDs. If you will be adding directories and files from other containers, they must have the appropriate permissions.
+    * If those containers allow you to set a UID and GUID then consider doing so. 
+* Symbolic links to the host will not work inside containers.
